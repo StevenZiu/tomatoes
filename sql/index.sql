@@ -31,7 +31,7 @@ create table if not exists Tomatos(
   tomato_description varchar(500) not null,
   start_at timestamp not null,
   end_at timestamp not null,
-  updated_at timestamp default null on update current_timestamp
+  updated_at timestamp default current_timestamp on update current_timestamp
 );
 
 
