@@ -6,11 +6,13 @@ var logger = require("morgan");
 const cors = require("cors");
 const mysql = require("mysql");
 const chalk = require("chalk");
-const { connectDB } = require("./services/connectDB");
+const sanitizer = require('express-sanitizer')
+const {
+  connectDB
+} = require("./services/connectDB");
 require("dotenv").config();
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
 
 var app = express();
 
@@ -19,18 +21,24 @@ app.use(cors());
 
 // connect database
 connectDB(app);
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// sanitizer
+app.use(sanitizer())
+
+app.use(express.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/api/v1", indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
