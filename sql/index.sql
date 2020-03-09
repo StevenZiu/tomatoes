@@ -29,8 +29,8 @@ create table if not exists Tomatos(
   project_id int unsigned not null,
   tomato_title varchar(100) not null,
   tomato_description varchar(500) not null,
-  start_at timestamp not null,
-  end_at timestamp not null,
+  start_at timestamp default current_timestamp,
+  end_at timestamp default current_timestamp,
   updated_at timestamp default current_timestamp on update current_timestamp
 );
 
