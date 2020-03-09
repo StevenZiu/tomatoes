@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const sha256 = require("sha256");
 const jwt = require("jsonwebtoken");
-// login route
+
+// register route
 router.post("/register", (req, res, next) => {
   const {
     email = null,
@@ -102,5 +103,9 @@ router.post("/login", (req, res, next) => {
     }
   });
 });
+
+// TODO:
+// forgot password route
+// reset password route
 
 module.exports = router;
