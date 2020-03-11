@@ -114,7 +114,6 @@ router.post("/login", (req, res, next) => {
   });
 });
 
-// TODO:
 // forgot password route
 router.post("/forgot-password", (req, res, next) => {
   const { email = null } = req.body;
@@ -216,6 +215,52 @@ router.get("/reset-password", (req, res, next) => {
           return;
         }
         res.status(200).send(`Token verifed success: ${decoded.email}`);
+      });
+    } else {
+      res.status(400).send("Token Verified Failed");
+    }
+  });
+});
+
+// set new password
+router.post("/new-password", (req, res, next) => {
+  // token for reset password
+  let { token, password } = req.body;
+  token = req.sanitize(token);
+  password = req.sanitize(password);
+  if (token === undefined || token === "") {
+    res.status(400).send("reset token missing");
+  }
+  const decodedToken = jwt.decode(token);
+  const { email } = decodedToken;
+  const db = req.app.db;
+  const getUserOldPassword = `select * from Users where email_address = '${email}'`;
+  db.query(getUserOldPassword, (err, result) => {
+    if (err) {
+      res.status(500).send("Server Error");
+      console.log(err.sqlMessage);
+      return;
+    }
+    if (result.length !== 0) {
+      const { login_password } = result[0];
+      jwt.verify(token, login_password, (err, decoded) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send(`Token verified failed: ${err}`);
+          return;
+        }
+        const newPassword = sha256(password).substr(0, 20);
+        const changePassword = `update Users set login_password = '${newPassword}' where email_address = '${email}'`;
+        db.query(changePassword, (err, result) => {
+          if (err) {
+            console.log(err.sqlMessage);
+            res.status(500).send("Server Error");
+            return;
+          }
+          if (result.affectedRows === 1) {
+            res.status(201).send("New password updated");
+          }
+        });
       });
     } else {
       res.status(400).send("Token Verified Failed");
