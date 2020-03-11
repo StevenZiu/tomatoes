@@ -26,7 +26,8 @@ create table if not exists Tomatos(
   tomato_id int unsigned auto_increment primary key,
   -- foreign key
   user_id int unsigned not null,
-  project_id int unsigned not null,
+  -- project id can be null
+  project_id int unsigned default null,
   tomato_title varchar(100) not null,
   tomato_description varchar(500) not null,
   start_at timestamp default current_timestamp,
