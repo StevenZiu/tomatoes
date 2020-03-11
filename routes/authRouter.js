@@ -134,10 +134,10 @@ router.post("/forgot-password", (req, res, next) => {
     if (result.length !== 0) {
       const passwordAsJWTSecret = result[0].login_password;
       jwt.sign(
-        { cleanEmail },
+        { email: cleanEmail },
         passwordAsJWTSecret,
         // token expires in 10 mins
-        { expiresIn: "600", algorithm: "HS256" },
+        { expiresIn: "1h", algorithm: "HS256" },
         async (err, token) => {
           if (err) {
             res.status(500).send("Server Error");
@@ -190,6 +190,36 @@ router.post("/forgot-password", (req, res, next) => {
       );
   });
 });
-// reset password route
 
+// check reset password token
+router.get("/reset-password", (req, res, next) => {
+  const token = req.query.token;
+  if (token === undefined || token === "") {
+    res.status(400).send("reset token missing");
+  }
+  const decodedToken = jwt.decode(token);
+  const { email } = decodedToken;
+  const db = req.app.db;
+  const getUserOldPassword = `select * from Users where email_address = '${email}'`;
+  db.query(getUserOldPassword, (err, result) => {
+    if (err) {
+      res.status(500).send("Server Error");
+      console.log(err.sqlMessage);
+      return;
+    }
+    if (result.length !== 0) {
+      const { login_password } = result[0];
+      jwt.verify(token, login_password, (err, decoded) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send(`Token verified failed: ${err}`);
+          return;
+        }
+        res.status(200).send(`Token verifed success: ${decoded.email}`);
+      });
+    } else {
+      res.status(400).send("Token Verified Failed");
+    }
+  });
+});
 module.exports = router;
