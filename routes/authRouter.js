@@ -87,13 +87,18 @@ router.post("/login", (req, res, next) => {
       results[0].login_password === sha256(cleanPassword).substr(0, 20)
     ) {
       // login success, generate the jwt
-      const userInfoInJwt = { user_id: results[0].user_id };
+      // attach the user information in the jwt
+      const userInfoInJwt = {
+        user_id: results[0].user_id,
+        user_email: results[0].email_address
+      };
       const secret = process.env.JWT_SECRET;
       if (!secret) {
         res.status(500).send("Server Error");
         console.log("JWT secret missing");
         return;
       }
+      // TODO: one user can only have one jwt in an hour
       jwt.sign(
         userInfoInJwt,
         secret,

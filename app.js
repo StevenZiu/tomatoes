@@ -7,6 +7,7 @@ const cors = require("cors");
 const mysql = require("mysql");
 const chalk = require("chalk");
 const sanitizer = require('express-sanitizer')
+const bearerToken = require('express-bearer-token')
 const {
   connectDB
 } = require("./services/connectDB");
@@ -18,6 +19,7 @@ var app = express();
 
 // cors
 app.use(cors());
+app.use(bearerToken())
 
 // connect database
 connectDB(app);
