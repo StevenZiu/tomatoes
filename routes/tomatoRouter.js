@@ -42,6 +42,53 @@ router.post("/create", (req, res, next) => {
   });
 });
 
+// delete tomato by tomato id
+router.delete("/", (req, res, next) => {
+  const { tomatoId } = req.body;
+  const user_id = req.user_id;
+  const db = req.app.db;
+  // only creator can delete the tomato or admin
+  const deleteTomato = `delete from tomatos where tomato_id = '${tomatoId}' and user_id = '${user_id}'`;
+  db.query(deleteTomato, (err, result) => {
+    if (err) {
+      res.status(500).send("server error");
+      console.log(err.sqlMessage);
+      return;
+    } else if (result.affectedRows === 1) {
+      res.status(201).send("deleted tomato");
+      return;
+    }
+    res.status(201).send("target tomato not found");
+  });
+});
+
+// FIXME: how to check update fields
+// update tomato by tomato id
+router.put("/", (req, res, next) => {
+  const {
+    tomatoTitle = null,
+    tomatoDescription = null,
+    tomatoId = null
+  } = req.body;
+  if (tomatoTitle !== null && tomatoDescription !== null && tomatoId !== null) {
+    const db = req.app.db;
+    const userId = req.user_id;
+    const updateTomato = `update tomatos set tomato_title = '${tomatoTitle}', tomato_description = '${tomatoDescription}' where tomato_id = '${tomatoId}' and user_id = '${userId}'`;
+    db.query(updateTomato, (err, result) => {
+      if (err) {
+        res.status(500).send("Server Error");
+        console.log(err.sqlMessage);
+      } else if (result.affectedRows === 1) {
+        res.status(201).send("Tomato updated");
+      } else {
+        res.status(200).send("target tomato not found");
+      }
+    });
+  } else {
+    res.status(400).send("missing information");
+  }
+});
+
 // get all tomatos by user id
 router.get("/", (req, res, next) => {
   const user_id = req.user_id;
