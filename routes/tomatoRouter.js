@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const sha256 = require("sha256");
-const chalk = require("chalk");
 
 // create new tomato
 router.post("/create", (req, res, next) => {
